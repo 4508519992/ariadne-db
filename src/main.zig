@@ -1,5 +1,6 @@
 const std = @import("std");
 
+const ValueType = enum { Node, Edge };
 pub const Edge = struct {
     id: i32,
     from: i32,
@@ -46,8 +47,15 @@ pub const Graph = struct {
         self.edge_index.deinit();
     }
 
-    pub fn exists(self: *Graph, node_to_check: i32) bool {
-        return self.node_index.contains(node_to_check);
+    pub fn exists(self: *Graph, value_id: i32, value_type: ValueType) bool {
+        switch (value_type) {
+            ValueType.Edge => {
+                return self.edge_index.contains(value_id);
+            },
+            ValueType.Node => {
+                return self.node_index.contains(value_id);
+            },
+        }
     }
 
     pub fn add(self: *Graph, node: Node) !i32 {
@@ -60,7 +68,7 @@ pub const Graph = struct {
     }
 
     pub fn connect(self: *Graph, from: i32, to: i32) !void {
-        if (!self.exists(from) or !self.exists(to)) {
+        if (!self.exists(from, .Node) or !self.exists(to, .Node)) {
             return error.OneOrBothNodesDoNotExist;
         }
 
