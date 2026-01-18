@@ -19,6 +19,7 @@ pub const Graph = struct {
     nodes: std.ArrayList(Node),
     edges: std.ArrayList(Edge),
     node_index: std.AutoHashMap(i32, usize),
+    edge_index: std.AutoHashMap(i32, usize),
     current_idx: i32,
     current_edge_idx: i32,
 
@@ -30,6 +31,7 @@ pub const Graph = struct {
             .current_idx = 0,
             .current_edge_idx = 0,
             .node_index = std.AutoHashMap(i32, usize).init(allocator),
+            .edge_index = std.AutoHashMap(i32, usize).init(allocator),
         };
     }
 
@@ -41,6 +43,7 @@ pub const Graph = struct {
         self.nodes.deinit(self.allocator);
         self.edges.deinit(self.allocator);
         self.node_index.deinit();
+        self.edge_index.deinit();
     }
 
     pub fn exists(self: *Graph, node_to_check: i32) bool {
@@ -64,6 +67,7 @@ pub const Graph = struct {
         const new_edge = Edge{ .id = self.current_edge_idx + 1, .from = from, .to = to };
         try self.edges.append(self.allocator, new_edge);
         self.current_edge_idx += 1;
+        try self.edge_index.put(new_edge.id, self.edges.items.len - 1);
 
         const from_node_index = self.node_index.get(from);
         if (from_node_index) |from_index| {
